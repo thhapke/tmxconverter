@@ -6,8 +6,8 @@ import csv
 import yaml
 
 
-from save2files import save_file
-from save2hdb import save_db
+from tmxconverter.save2files import save_file
+from tmxconverter.save2hdb import save_db
 
 ###
 # configuration
