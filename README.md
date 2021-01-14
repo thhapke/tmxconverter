@@ -51,3 +51,28 @@ CREATE COLUMN TABLE "TMX"."DATA"(
 )
 ```
 
+## Example Config.YAML
+```
+# input folder
+input_folder : /Users/Shared/data/tmx/input
+
+#language coding map
+lang_map_file : language_code_mapping.csv
+
+# output files
+OUTPUT_FILES : true # save to output folder
+OUTPUT_FOLDER : /Users/Shared/data/tmx/output
+
+# HANA DB
+OUTPUT_HDB : false  # Save to db
+HDB_HOST : 'xxx.com'
+HDB_USER : 'TMXUSER'
+HDB_PWD : 'PassWord'
+HDB_PORT : 111
+
+# Test Parameter
+TEST : true
+MAX_NUMBER_FILES : 100  # max number of files processed. NOT used when EXCLUSIVE_FILE given
+EXCLUSIVE_FILE : reviews.tmx  # If not used leave empty
+#EXCLUSIVE_FILE :
+```
