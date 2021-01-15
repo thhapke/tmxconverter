@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="tmxconverter",
-    version="0.0.1",
+    version="0.0.2",
     author="Thorsten Hapke",
     author_email="thorsten.hapke@sap.com",
     description="Converts TMX files to CSV-files and/or stores to HANA table",
