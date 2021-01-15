@@ -10,7 +10,7 @@ The language code is mapped to the 2-character code based on the given file 'lan
 The application is using a yaml-configuration file **config.yaml** to control the behaviour read from the working directory. 
 
 ## Command line options
-
+``tmxconverter -log [loglevel]``` with 'warning','info' and 'debug'
 
 
 ## Mapping
@@ -24,7 +24,17 @@ The application is using a yaml-configuration file **config.yaml** to control th
 * From filename substring until '_' : domain
 * Filename : origin
 * ```<body><tu><tuv xml:lang``` : target_lang if different from source_lang using the language mapping
-*  ```<body><tu><tuv><seg>```: source_text or target_text depending lang-attribute
+*  ```<body><tu><tuv><seg>```: source_text or target_text depending lang-attribute`
+
+## Regular Expression
+As a first basic filter a list of regular expressions separated by a 'line separator' can be passed that are stored
+in a text-file. 
+
+Examples: 
+* ```\s*$```
+* ```\s*\d+\s*$```
+* ```\s*\d*\.\d+\s*$```
+
 
 ## Files Output
 
