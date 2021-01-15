@@ -128,9 +128,12 @@ def main() : # encapsulated into main otherwise entrypoint is not working
             rec['change_id'] = tu.attrib.get('changeid')
             uc = tu.attrib.get('usagecount')
             rec['usage_count'] = None if uc == None else int(uc)
-            rec['created'] = datetime.strptime(tu.attrib.get('creationdate'), '%Y%m%dT%H%M%SZ')
-            rec['changed'] = datetime.strptime(tu.attrib.get('changedate'), '%Y%m%dT%H%M%SZ')
-            rec['last_usage'] = datetime.strptime(tu.attrib.get('lastusagedate'), '%Y%m%dT%H%M%SZ')
+            created = tu.attrib.get('creationdate')
+            rec['created'] = None if not created else datetime.strptime(created,'%Y%m%dT%H%M%SZ')
+            changed = tu.attrib.get('changedate')
+            rec['changed'] = None if not changed else datetime.strptime(changed, '%Y%m%dT%H%M%SZ')
+            lastusage = tu.attrib.get('lastusagedate')
+            rec['last_usage'] = None if not lastusage else datetime.strptime(lastusage, '%Y%m%dT%H%M%SZ')
             rec['origin'] = filename.split('.')[0]
             rec['source_lang'] = src_lang
             rec['domain'] = domain
@@ -145,7 +148,9 @@ def main() : # encapsulated into main otherwise entrypoint is not working
                     rec['target_text'] = segtext
                     rec['target_lang']  = lang
 
-                if params['REGEX'] :
+                if not segtext :
+                    drop = True
+                elif params['REGEX'] :
                     for r in regex_pattern :
                         if re.match(r,segtext) :
                             drop = True
