@@ -16,6 +16,10 @@ HDB_USER : 'TMXUSER'
 HDB_PWD : 'PassWord'
 HDB_PORT : 111
 
+# REGEX
+REGEX : true # drops texts that match regexs
+OUTPUT_REGEX : /Users/Shared/data/tmx/log/regex_dropouts.csv
+
 # Test Parameter
 TEST : true
 MAX_NUMBER_FILES : 100  # max number of files processed. NOT used when EXCLUSIVE_FILE given

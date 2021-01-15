@@ -9,6 +9,10 @@ The language code is mapped to the 2-character code based on the given file 'lan
 
 The application is using a yaml-configuration file **config.yaml** to control the behaviour read from the working directory. 
 
+## Command line options
+
+
+
 ## Mapping
 
 * ```<tmx><header srclang="en-US"> ```: source_lang

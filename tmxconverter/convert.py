@@ -2,22 +2,40 @@ import xml.etree.ElementTree as ET
 from os import path, listdir
 from _datetime import datetime
 import csv
+import re
+import logging
+from datetime import datetime, timedelta
+from argparse import ArgumentParser
 
 import yaml
-
 
 from tmxconverter.save2files import save_file
 from tmxconverter.save2hdb import save_db
 
+### Command line
+parser = ArgumentParser(description='Converts tmx-files')
+parser.add_argument('--log','-l',help='Setting logging level \'warning\' (default), \'info\', \'debug\'')
+args = parser.parse_args()
+loglevelmap = {'warning':logging.WARNING,'debug':logging.DEBUG,'warning':logging.WARNING}
+loglevel = logging.WARNING if args.log == None else loglevelmap[args.log]
+
+### Logging
+logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',level=loglevel)
+
+start_timestamp = datetime.now()
+logging.info('Conversion started: {}'.format(start_timestamp.strftime('%H:%M:%S%f')))
+
 ###
 # configuration
 ###
+logging.info('Open configuraion file {}'.format('config.yaml'))
 with open('config.yaml') as yamls :
     params = yaml.safe_load(yamls)
 
 # directories
 input_folder = params['input_folder']
 if params['OUTPUT_FILES'] :
+    logging.info('CSV Files stored to: {}'.format(params['OUTPUT_FOLDER']))
     output_folder = params['OUTPUT_FOLDER']
 lang_map_file = params['lang_map_file']
 
@@ -28,16 +46,38 @@ with open(lang_map_file) as filename :
         langmapcodes[line[0]] = line[1]
 
 # db config
-db = {'host':params['HDB_HOST'],
-      'user':params['HDB_USER'],
-      'pwd':params['HDB_PWD'],
-      'port':params['HDB_PORT']}
+if params['OUTPUT_HDB'] :
+    logging.info('Setting DB connection parameter.')
+    db = {'host':params['HDB_HOST'],
+          'user':params['HDB_USER'],
+          'pwd':params['HDB_PWD'],
+          'port':params['HDB_PORT']}
+
+# regex
+regex_pattern = list()
+regex_dropouts = list()
+if params['REGEX'] :
+    logging.info('Reading regex pattern file {}'.format(params['INPUT_REGEX']))
+    with open(params['INPUT_REGEX']) as file:
+        while True :
+            line = file.readline().rstrip('\n')
+            if line :
+                regex_pattern.append(line)
+            else :
+                break
+        file.close()
+    # clean log file
+    with open(params['OUTPUT_REGEX_LOG'], 'w') as file:
+        csvwriter = csv.writer(file)
+        file.close()
+
 
 # files to be processed
 tmxfiles = listdir(input_folder)
 
 # test parameters
 if params['TEST'] :
+    logging.info('Run in TEST-mode')
     exclusive_file = params['EXCLUSIVE_FILE']
     #exclusive_filename = None
     max_number_files = params['MAX_NUMBER_FILES']
@@ -69,6 +109,7 @@ for i, filename in enumerate(tmxfiles):
         raise UserWarning('Root is not <tmx> tag for file: {}'.format(filename))
         continue
 
+    logging.debug('Convert file: {}'.format(filename))
     domain = filename.split('_')[0]
 
     # header
@@ -79,6 +120,7 @@ for i, filename in enumerate(tmxfiles):
     tu_records = list()
     body = root.find('body')
     for tu in body :
+        drop = False
         rec = dict()
         rec['creation_id'] =  tu.attrib.get('creationid')
         rec['change_id'] = tu.attrib.get('changeid')
@@ -101,16 +143,41 @@ for i, filename in enumerate(tmxfiles):
                 rec['target_text'] = segtext
                 rec['target_lang']  = lang
 
+            if params['REGEX'] :
+                for r in regex_pattern :
+                    if re.match(r,segtext) :
+                        drop = True
+                        dropout = (filename,r,segtext)
+                        regex_dropouts.append(dropout)
 
-        tu_records.append(rec)
+        if not drop :
+            tu_records.append(rec)
 
     if  params['OUTPUT_FILES'] :
         csvfilename = filename.replace('.tmx', '.csv')
         outfile = path.join(output_folder,csvfilename)
         save_file(tu_records,outfile)
+        logging.debug('TMX data save as csv-file: {}'.format(csvfilename))
 
     if params['OUTPUT_HDB'] :
         save_db(tu_records,db)
+        logging.debug('TMX data saved in DB: {}'.format(filename))
+
+    if params['REGEX'] :
+        with open(params['OUTPUT_REGEX_LOG'],'a') as file :
+            csvwriter = csv.writer(file)
+            for line in regex_dropouts :
+                csvwriter.writerow(line)
+
+    logging.debug('File processed: {}'.format(filename))
+
+# time calculation
+end_timestamp = datetime.now()
+duration = end_timestamp - start_timestamp
+
+logging.info('Conversion ended: {} (Time: {})'.format(end_timestamp,str(duration)))
+
+#if __name__ == '__main__':
 
 
 
