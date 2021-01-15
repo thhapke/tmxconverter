@@ -13,14 +13,12 @@ from tmxconverter.save2files import save_file
 from tmxconverter.save2hdb import save_db
 
 
-
-if __name__ == '__main__':  # encapsulated into main otherwise entrypoint is not working
-
+def main() : # encapsulated into main otherwise entrypoint is not working
     ### Command line
     parser = ArgumentParser(description='Converts tmx-files')
     parser.add_argument('--log','-l',help='Setting logging level \'warning\' (default), \'info\', \'debug\'')
     args = parser.parse_args()
-    loglevelmap = {'warning':logging.WARNING,'debug':logging.DEBUG,'warning':logging.WARNING}
+    loglevelmap = {'warning':logging.WARNING,'debug':logging.DEBUG,'info':logging.INFO}
     loglevel = logging.WARNING if args.log == None else loglevelmap[args.log]
 
     ### Logging
@@ -182,7 +180,7 @@ if __name__ == '__main__':  # encapsulated into main otherwise entrypoint is not
     logging.info('Conversion ended: {} (Time: {})'.format(end_timestamp,str(duration)))
 
 
-
-
+if __name__ == '__main__':
+    main()
 
 
