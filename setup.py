@@ -1,11 +1,11 @@
 import setuptools
 
-with open("README.md", "r", encoding="utf-8") as fh:
+with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="tmxconverter",
-    version="0.0.5",
+    version="0.0.6",
     author="Thorsten Hapke",
     author_email="thorsten.hapke@sap.com",
     description="Converts TMX files to CSV-files and/or stores to HANA table",
