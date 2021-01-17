@@ -14,6 +14,7 @@ from tmxconverter.save2hdb import save_db
 from tmxconverter.readfiles import read_regex, read_language_code_mapping, remedyxml
 
 
+
 def main() : # encapsulated into main otherwise entrypoint is not working
     ### Command line
     parser = ArgumentParser(description='Converts tmx-files')
@@ -63,6 +64,7 @@ def main() : # encapsulated into main otherwise entrypoint is not working
     tmxfiles = listdir(input_folder)
 
     # test parameters
+    max_number_files = 0
     if params['TEST'] :
         logging.info('Run in TEST-mode')
         exclusive_file = params['EXCLUSIVE_FILE']
@@ -72,7 +74,7 @@ def main() : # encapsulated into main otherwise entrypoint is not working
             max_number_files = 0
     max_number_files = len(tmxfiles) if max_number_files == 0 or max_number_files > len(tmxfiles)  else max_number_files
 
-
+    all_records = 0
     for i, filename in enumerate(tmxfiles):
 
         if params['TEST'] :
@@ -158,6 +160,7 @@ def main() : # encapsulated into main otherwise entrypoint is not working
                 break
 
         logging.info('Number of Records: processed: {} - saved: {} - dropped: {}'.format(len(tu_elements),tu_count,tu_count_drop))
+        all_records += len(tu_elements)
         if  params['OUTPUT_FILES'] :
             csvfilename = filename.replace('.tmx', '.csv')
             outfile = path.join(output_folder,csvfilename)
@@ -179,6 +182,7 @@ def main() : # encapsulated into main otherwise entrypoint is not working
     end_timestamp = datetime.now()
     duration = end_timestamp - start_timestamp
 
+    logging.info('Number of all records: {}'.format(all_records))
     logging.info('Conversion ended: {} (Time: {})'.format(end_timestamp,str(duration)))
 
 
