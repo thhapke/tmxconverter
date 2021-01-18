@@ -25,18 +25,3 @@ def read_language_code_mapping(filename) :
         for line in csv.reader(file):
             langmapcodes[line[0]] = line[1]
     return langmapcodes
-
-def remedyxml(filename, position ) :
-    text = ''
-    with open(filename) as file:
-        count = 1
-        while True :
-            line = file.readline()
-            if line :
-                if count == position[0] :
-                    failed_char = line[position[1]]
-                    line[position[1]] = ' '
-                text += line
-            else :
-                break
-    return text

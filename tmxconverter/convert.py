@@ -11,7 +11,7 @@ import yaml
 
 from tmxconverter.save2files import save_file
 from tmxconverter.save2hdb import save_db
-from tmxconverter.readfiles import read_regex, read_language_code_mapping, remedyxml
+from tmxconverter.readfiles import read_regex, read_language_code_mapping
 
 
 
