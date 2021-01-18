@@ -105,6 +105,7 @@ def main() : # encapsulated into main otherwise entrypoint is not working
         event, elem = next(context)
         tu_count = 0
         tu_count_drop = 0
+        seg_branch = False
         while not elem == None:
             if event == 'start':
                 if elem.tag == 'tuv' :
@@ -114,6 +115,10 @@ def main() : # encapsulated into main otherwise entrypoint is not working
                     rec = dict()  # new dict
                 elif elem.tag == 'header':
                     src_lang = langmapcodes[elem.attrib['srclang']]
+                elif elem.tag == 'seg':
+                    seg_branch = True
+                    text = elem.text if elem.text else ''
+
             elif event == 'end' :
                 if elem.tag == 'tu' :
                     tu_count += 1
@@ -137,20 +142,28 @@ def main() : # encapsulated into main otherwise entrypoint is not working
                         tu_count_drop += 1
                 elif elem.tag == 'seg':
                     if elem.text:
+                        seg_branch = False
+#                        if params['XML_REMOVE_NL'] :
+#                            text = text.replace('\n','')
                         if params['REGEX']:
                             for r in regex_pattern:
-                                if re.match(r, elem.text):
+                                if re.match(r, text):
                                     drop = True
-                                    dropout = (filename, r, elem.text)
+                                    dropout = (filename, r, text)
                                     regex_dropouts.append(dropout)
                         if lang == src_lang:
                             rec['source_lang'] = lang
-                            rec['source_text'] = elem.text
+                            rec['source_text'] = text
                         else:
-                            rec['target_text'] = elem.text
+                            rec['target_text'] = text
                             rec['target_lang'] = lang
                     else :
                         drop = True
+                elif seg_branch :
+                    if elem.text :
+                        text += elem.text
+                    if elem.tail :
+                        text += elem.tail
             try:
                 event, elem = next(context)
             except ET.ParseError as e:

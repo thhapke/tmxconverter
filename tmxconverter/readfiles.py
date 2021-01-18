@@ -1,5 +1,6 @@
 
 import csv
+import re
 
 def read_regex(filename,outputfile) :
     regex_pattern = list()
@@ -7,7 +8,8 @@ def read_regex(filename,outputfile) :
         while True :
             line = file.readline().rstrip('\n')
             if line :
-                regex_pattern.append(line)
+                if not re.match('\s*#', line) :
+                    regex_pattern.append(line)
             else :
                 break
         file.close()
