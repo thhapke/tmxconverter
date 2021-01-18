@@ -143,8 +143,6 @@ def main() : # encapsulated into main otherwise entrypoint is not working
                 elif elem.tag == 'seg':
                     if elem.text:
                         seg_branch = False
-#                        if params['XML_REMOVE_NL'] :
-#                            text = text.replace('\n','')
                         if params['REGEX']:
                             for r in regex_pattern:
                                 if re.match(r, text):
