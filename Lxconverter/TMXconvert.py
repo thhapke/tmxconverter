@@ -96,7 +96,10 @@ def main() : # encapsulated into main otherwise entrypoint is not working
         logging.info('{}/{}: {}'.format(i+1,max_number_files, filename))
 
         tu_elements = []
-        domain = filename.split('_')[0]
+        domain = re.search("(.+)_\w{4}_\w{4}\.tmx$",filename).group(1)
+        if not domain:
+            logging.warning('Filename does not match regex pattern. Replaced by filename: {}'.format(filename))
+            domain = filename.split('.')[0]
         drop = False
         src_lang = ''
         lang = ''
