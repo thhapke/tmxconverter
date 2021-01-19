@@ -11,7 +11,7 @@ import yaml
 
 from Lxconverter.save2files import save_file
 from Lxconverter.save2hdb import save_db
-from Lxconverter.readfiles import read_regex, read_language_code_mapping
+from Lxconverter.readfiles import read_regex, read_code_mapping
 
 
 
@@ -43,7 +43,10 @@ def main() : # encapsulated into main otherwise entrypoint is not working
         output_folder = params['TMX_OUTPUT_FOLDER']
 
     # language mapping file
-    langmapcodes = read_language_code_mapping(params['lang_map_file'])
+    langmapcodes = read_code_mapping(params['LANGUAGE_CODE_MAPPING'])
+
+    # domain mapping file
+    domainmapcodes = read_code_mapping(params['DOMAIN_CODE_MAPPING'])
 
     # db config
     if params['OUTPUT_HDB'] :
@@ -64,6 +67,7 @@ def main() : # encapsulated into main otherwise entrypoint is not working
 
     # files to be processed
     tmxfiles = listdir(input_folder)
+
 
     # test parameters
     max_number_files = 0
@@ -95,22 +99,26 @@ def main() : # encapsulated into main otherwise entrypoint is not working
 
         logging.info('{}/{}: {}'.format(i+1,max_number_files, filename))
 
+
+
+        # variables for each filename context
         tu_elements = []
-        domain = re.search("(.+)_\w{4}_\w{4}\.tmx$",filename).group(1)
-        if not domain:
-            logging.warning('Filename does not match regex pattern. Replaced by filename: {}'.format(filename))
-            domain = filename.split('.')[0]
         drop = False
         src_lang = ''
         lang = ''
         rec = dict()
-
-
-        context = iter(ET.iterparse(path.join(input_folder, filename),events=("start","end")))
-        event, elem = next(context)
         tu_count = 0
         tu_count_drop = 0
         seg_branch = False
+        domain_file = re.search("(.+)_\w{4}_\w{4}\.tmx$",filename).group(1)
+        try :
+            domain = domainmapcodes[domain_file]
+        except KeyError:
+            logging.warning('Domain not in mapping code list: {} ({}'.format(domain_file,filename))
+            domain = 'XX'
+
+        context = iter(ET.iterparse(path.join(input_folder, filename), events=("start", "end")))
+        event, elem = next(context)
         while not elem == None:
             if event == 'start':
                 if elem.tag == 'tuv' :

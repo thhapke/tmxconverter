@@ -20,10 +20,10 @@ def read_regex(filename,outputfile) :
     return regex_pattern
 
 
-def read_language_code_mapping(filename) :
+def read_code_mapping(filename) :
     # language mapping file
-    langmapcodes = dict()
+    mapcodes = dict()
     with open(filename) as file :
         for line in csv.reader(file):
-            langmapcodes[line[0]] = line[1]
-    return langmapcodes
+            mapcodes[line[0]] = line[1]
+    return mapcodes
