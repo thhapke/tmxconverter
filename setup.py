@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="tmxconverter",
+    name="Lxconverter",
     version="0.0.6",
     author="Thorsten Hapke",
     author_email="thorsten.hapke@sap.com",
@@ -14,14 +14,14 @@ setuptools.setup(
     url="https://github.com/thhapke/tmxconverter",
     keywords = ['tmx'],
     #packages=setuptools.find_packages(),
-    packages=["tmxconverter"],
+    packages=["Lxconverter"],
     install_requires=[
         'pandas','pyyaml','hdbcli'
     ],
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            "tmxconverter = tmxconverter.convert:main"
+            "Lxconverter = Lxconverter.convert:main"
         ]
     },
     classifiers=[

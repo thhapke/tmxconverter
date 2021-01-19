@@ -9,9 +9,9 @@ from argparse import ArgumentParser
 
 import yaml
 
-from tmxconverter.save2files import save_file
-from tmxconverter.save2hdb import save_db
-from tmxconverter.readfiles import read_regex, read_language_code_mapping
+from Lxconverter.save2files import save_file
+from Lxconverter.save2hdb import save_db
+from Lxconverter.readfiles import read_regex, read_language_code_mapping
 
 
 
@@ -37,10 +37,10 @@ def main() : # encapsulated into main otherwise entrypoint is not working
         params = yaml.safe_load(yamls)
 
     # directories
-    input_folder = params['input_folder']
-    if params['OUTPUT_FILES'] :
-        logging.info('CSV Files stored to: {}'.format(params['OUTPUT_FOLDER']))
-        output_folder = params['OUTPUT_FOLDER']
+    input_folder = params['TMX_INPUT_FOLDER']
+    if params['TMX_OUTPUT_FILES'] :
+        logging.info('CSV Files stored to: {}'.format(params['TMX_OUTPUT_FOLDER']))
+        output_folder = params['TMX_OUTPUT_FOLDER']
 
     # language mapping file
     langmapcodes = read_language_code_mapping(params['lang_map_file'])
@@ -52,6 +52,8 @@ def main() : # encapsulated into main otherwise entrypoint is not working
               'user':params['HDB_USER'],
               'pwd':params['HDB_PWD'],
               'port':params['HDB_PORT']}
+        batchsize = int(params['BATCHSIZE'])
+        text_max_len = 100000 if params['MAX_LEN'] == 0 else params['MAX_LEN']
 
     # regex
     regex_pattern = list()
@@ -123,8 +125,7 @@ def main() : # encapsulated into main otherwise entrypoint is not working
                 if elem.tag == 'tu' :
                     tu_count += 1
                     if not drop :  # If sth went wrong do not save elem
-                        rec['creation_id'] = elem.attrib.get('creationid')
-                        rec['change_id'] = elem.attrib.get('changeid')
+                        rec['source'] = 'TMX'
                         uc = elem.attrib.get('usagecount')
                         rec['usage_count'] = None if uc == None else int(uc)
                         created = elem.attrib.get('creationdate')
@@ -151,9 +152,9 @@ def main() : # encapsulated into main otherwise entrypoint is not working
                                     regex_dropouts.append(dropout)
                         if lang == src_lang:
                             rec['source_lang'] = lang
-                            rec['source_text'] = text
+                            rec['source_text'] = text[:text_max_len]
                         else:
-                            rec['target_text'] = text
+                            rec['target_text'] = text[:text_max_len]
                             rec['target_lang'] = lang
                     else :
                         drop = True
@@ -172,14 +173,14 @@ def main() : # encapsulated into main otherwise entrypoint is not working
 
         logging.info('Number of Records: processed: {} - saved: {} - dropped: {}'.format(len(tu_elements),tu_count,tu_count_drop))
         all_records += len(tu_elements)
-        if  params['OUTPUT_FILES'] :
+        if  params['TMX_OUTPUT_FILES'] :
             csvfilename = filename.replace('.tmx', '.csv')
             outfile = path.join(output_folder,csvfilename)
             save_file(tu_elements,outfile)
             logging.info('TMX data save as csv-file: {}'.format(csvfilename))
 
         if params['OUTPUT_HDB'] :
-            save_db(tu_elements,db)
+            save_db(tu_elements,db,batchsize=batchsize)
             logging.info('TMX data saved in DB: {}'.format(filename))
 
         if params['REGEX'] :
