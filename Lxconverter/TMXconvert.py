@@ -180,7 +180,7 @@ def main() : # encapsulated into main otherwise entrypoint is not working
             logging.info('TMX data save as csv-file: {}'.format(csvfilename))
 
         if params['OUTPUT_HDB'] :
-            save_db(tu_elements,db,batchsize=batchsize)
+            save_db(source = 'TMX',records=tu_elements,db=db,batchsize=batchsize)
             logging.info('TMX data saved in DB: {}'.format(filename))
 
         if params['REGEX'] :

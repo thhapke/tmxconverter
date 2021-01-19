@@ -3,9 +3,10 @@ from hdbcli import dbapi
 import logging
 import pandas as pd
 
-def save_db(source,records,db,batchsize = 0 ) :
+def save_db(source, records,db,batchsize = 0 ) :
     conn = dbapi.connect(address=db['host'], port=db['port'], user=db['user'], password=db['pwd'], encrypt=True,
                          sslValidateCertificate=False)
+
 
     if source == 'TMX' :
         data = [
