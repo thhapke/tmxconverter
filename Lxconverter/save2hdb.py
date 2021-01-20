@@ -16,9 +16,11 @@ def save_db(source, records,db,batchsize = 0 ) :
               'CREATED,CHANGED, LAST_USAGE,USAGE_COUNT) VALUES (?,?,?,?,?,?,?,?,?,?,?) WITH PRIMARY KEY;'
     elif source == 'ABAP' :
         data = records[['source','source_lang','source_text','target_lang','target_text','domain','origin','exported','changed',
-                 'last_usage','transl_system','abap_package','central_system','objtype','objname','max_langth','ach_comp',
+                 'last_usage','transl_system','abap_package','central_system','objtype','objname','max_length','ach_comp',
                  'sw_comp','sw_comp_version','pp_type','pp_qstatus','orig_lang']].to_records(index= False).tolist()
-        sql =''
+        sql ='UPSERT TMX.DATA (SOURCE,SOURCE_LANG, SOURCE_TEXT, TARGET_LANG, TARGET_TEXT, DOMAIN, ORIGIN, EXPORTED, ' \
+             'CHANGED,LAST_USAGE,USAGE_COUNT,TRANSL_SYSTEM,ABAP_PACKAGE,CENTRAL_SYSTEM,OBJTYPE,OBJNAME,MAX_LENGTH,ACH_COMP, '\
+             'SW_COMP,SW_COMP_VERSION,PP_TYPE,PP_QSTATUS,ORIG_LANG) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) WITH PRIMARY KEY;'
     else:
         raise ValueError('Unknown source: {}',format(source))
 

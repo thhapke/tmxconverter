@@ -20,9 +20,17 @@ def main() : # encapsulated into main otherwise entrypoint is not working
     ### Command line
     parser = ArgumentParser(description='Converts tmx-files')
     parser.add_argument('--log','-l',help='Setting logging level \'warning\' (default), \'info\', \'debug\'')
+    parser.add_argument('--exportdate', '-e', help='Provide the export date of the ABAP files with format: \'YYYY-MM-DD\'')
     args = parser.parse_args()
     loglevelmap = {'warning':logging.WARNING,'debug':logging.DEBUG,'info':logging.INFO}
     loglevel = logging.WARNING if args.log == None else loglevelmap[args.log]
+
+    if not args.exportdate :
+        exportdate = datetime.now()
+        logging.warning('No Export date given. For default taking todays date: {}'.format(datetime.strftime(exportdate,'%Y-%m-%d')))
+    else :
+        exportdate = datetime.strptime(args.exportdate,'%Y-%m-%d')
+
 
     ### Logging
     logging.basicConfig(format='%(levelname)s: %(asctime)s %(message)s',level=loglevel)
@@ -62,9 +70,9 @@ def main() : # encapsulated into main otherwise entrypoint is not working
     files = listdir(params['ABAP_INPUT_FOLDER'])
 
     # ABAP CSV header
-    headers = ['transl_system','abap_package','central_system','objtype','objname','orig_lang','domain_name','max_length',
+    headers = ['transl_system','abap_package','central_system','objtype','objname','orig_lang','domain','max_length',
                'ach_comp','sw_comp','sw_comp_version','source_text','source_lang','target_text','target_lang','pp_type',
-               'pp_qstatus','log_last_change_date','pp_chng_date']
+               'pp_qstatus','last_usage','changed']
 
     # test parameters
     max_number_files = 0
@@ -91,7 +99,10 @@ def main() : # encapsulated into main otherwise entrypoint is not working
             if i > max_number_files :
                 break
 
-        df = pd.read_csv(path.join(params['ABAP_INPUT_FOLDER'],filename),escapechar='\\', encoding='utf-8')
+        df = pd.read_csv(path.join(params['ABAP_INPUT_FOLDER'],filename),names = headers,escapechar='\\', encoding='utf-8')
+        df['origin'] = filename.split('.')[0]
+        df['source'] = 'ABAP'
+        df['exported'] = exportdate
 
         if params['OUTPUT_HDB'] :
             save_db(source = 'ABAP',records=df,db=db,batchsize=batchsize)
