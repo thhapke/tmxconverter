@@ -12,7 +12,7 @@ import yaml
 
 from Lxconverter.save2files import save_file
 from Lxconverter.save2hdb import save_db
-from Lxconverter.readfiles import read_regex, read_language_code_mapping
+from Lxconverter.readfiles import read_regex, read_code_mapping
 
 
 
@@ -39,7 +39,7 @@ def main() : # encapsulated into main otherwise entrypoint is not working
 
 
     # language mapping file
-    langmapcodes = read_language_code_mapping(params['lang_map_file'])
+    langmapcodes = read_code_mapping(params['LANGUAGE_CODE_MAPPING'])
 
     # db config
     if params['OUTPUT_HDB'] :
@@ -48,6 +48,8 @@ def main() : # encapsulated into main otherwise entrypoint is not working
               'user':params['HDB_USER'],
               'pwd':params['HDB_PWD'],
               'port':params['HDB_PORT']}
+        batchsize = int(params['BATCHSIZE'])
+        text_max_len = 100000 if params['MAX_LEN'] == 0 else params['MAX_LEN']
 
     # regex
     regex_pattern = list()
@@ -58,6 +60,11 @@ def main() : # encapsulated into main otherwise entrypoint is not working
 
     # files to be processed
     files = listdir(params['ABAP_INPUT_FOLDER'])
+
+    # ABAP CSV header
+    headers = ['transl_system','abap_package','central_system','objtype','objname','orig_lang','domain_name','max_length',
+               'ach_comp','sw_comp','sw_comp_version','source_text','source_lang','target_text','target_lang','pp_type',
+               'pp_qstatus','log_last_change_date','pp_chng_date']
 
     # test parameters
     max_number_files = 0
@@ -73,6 +80,10 @@ def main() : # encapsulated into main otherwise entrypoint is not working
     all_records = 0
     for i, filename in enumerate(files):
 
+        b = re.match('.+\.zip$', filename)
+        if not (re.match('.+\.zip$',filename) or re.match('.+\.csv$',filename) ):
+            continue
+
         if params['TEST'] :
             # for development only
             if exclusive_file and not filename == exclusive_file:
@@ -80,13 +91,11 @@ def main() : # encapsulated into main otherwise entrypoint is not working
             if i > max_number_files :
                 break
 
-        df = pd.read_csv(filename)
-
-
+        df = pd.read_csv(path.join(params['ABAP_INPUT_FOLDER'],filename),escapechar='\\', encoding='utf-8')
 
         if params['OUTPUT_HDB'] :
-            save_db(tu_elements,db)
-            logging.info('TMX data saved in DB: {}'.format(filename))
+            save_db(source = 'ABAP',records=df,db=db,batchsize=batchsize)
+            logging.info('ABAP data saved in DB: {}'.format(filename))
 
         if params['REGEX'] :
             with open(params['OUTPUT_REGEX_LOG'],'a') as file :
